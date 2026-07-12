@@ -189,7 +189,9 @@ def _handle_messaging(event, dm_rules, token, owner_id, page_ids: set[str]):
       if is_on_cooldown(owner_id, rule.id, sender_id):
         break
       ok = messaging.send_text(sender_id, rule.response, token)
-      rule.fire_count = (rule.fire_count or 0) + 1
+      fresh = DmRule.query.get(rule.id)
+      if fresh:
+        fresh.fire_count = (fresh.fire_count or 0) + 1
       db.session.commit()
       update_cooldown(owner_id, rule.id, sender_id)
       username = instagram_api.resolve_ig_username(owner_id, sender_id, token)
@@ -248,7 +250,9 @@ def _handle_comment(comment, rules, token, owner_id):
         ok = messaging.reply_comment(comment_id, comment_text, token)
         actions.append("replied_comment" if ok else "comment_failed")
 
-      rule.fire_count = (rule.fire_count or 0) + 1
+      fresh = CommentRule.query.get(rule.id)
+      if fresh:
+        fresh.fire_count = (fresh.fire_count or 0) + 1
       db.session.commit()
       if ig_user_id:
         update_cooldown(owner_id, rule.id, ig_user_id)
