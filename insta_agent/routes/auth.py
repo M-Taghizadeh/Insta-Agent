@@ -47,6 +47,10 @@ def require_ig_connection_for_panel():
   from flask import request
   if not current_user.is_authenticated:
     return
+  if not current_user.is_active:
+    logout_user()
+    flash("حساب کاربری غیرفعال شده است.", "error")
+    return redirect(url_for("auth.login"))
   ep = request.endpoint or ""
   if ep in PUBLIC_ENDPOINTS or ep.startswith("webhook."):
     return
@@ -76,6 +80,9 @@ def login():
       password = request.form.get("password", "")
       user = User.query.filter_by(username=username).first()
       if user and user.check_password(password):
+        if not user.is_active:
+          flash("حساب کاربری غیرفعال است — با پشتیبانی تماس بگیر.", "error")
+          return render_template("login.html")
         login_user(user, remember=bool(request.form.get("remember")))
         nxt = request.args.get("next")
         if nxt:

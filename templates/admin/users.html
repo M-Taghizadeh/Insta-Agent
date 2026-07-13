@@ -27,7 +27,8 @@
       <th>پیج</th>
       <th>فالوور</th>
       <th>پلن</th>
-      <th>وضعیت</th>
+      <th>اشتراک</th>
+      <th>اکانت</th>
       <th>انقضا (شمسی)</th>
       <th>ادمین</th>
       <th></th>
@@ -50,10 +51,35 @@
         <span class="badge danger">غیرفعال</span>
         {% else %}—{% endif %}
       </td>
+      <td>
+        {% if row.user.is_active %}
+        <span class="badge ok">فعال</span>
+        {% else %}
+        <span class="badge danger">غیرفعال</span>
+        {% endif %}
+      </td>
       <td style="color:var(--text-faint);">{{ row.sub.expires_at | jalali if row.sub and row.sub.expires_at else '—' }}</td>
       <td>{% if row.user.is_admin %}{{ icon('check', 14) }}{% else %}—{% endif %}</td>
       <td style="padding:10px;">
-        <a href="{{ url_for('admin.user_subscription', user_id=row.user.id) }}" class="btn secondary small">مدیریت پلن</a>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <a href="{{ url_for('admin.user_subscription', user_id=row.user.id) }}" class="btn secondary small">مدیریت پلن</a>
+          {% if not row.user.is_admin %}
+          <a href="{{ url_for('admin.user_edit', user_id=row.user.id) }}" class="btn ghost small">ویرایش</a>
+          <form method="post" action="{{ url_for('admin.user_toggle_active', user_id=row.user.id) }}" style="display:inline;">
+            <input type="hidden" name="q" value="{{ q }}">
+            <button type="submit" class="btn ghost small">
+              {% if row.user.is_active %}غیرفعال{% else %}فعال{% endif %}
+            </button>
+          </form>
+          {% if row.user.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.user_delete', user_id=row.user.id) }}" style="display:inline;"
+                onsubmit="return confirm('کاربر {{ row.user.username }} برای همیشه حذف شود؟')">
+            <input type="hidden" name="q" value="{{ q }}">
+            <button type="submit" class="btn ghost small" style="color:var(--danger);">حذف</button>
+          </form>
+          {% endif %}
+          {% endif %}
+        </div>
       </td>
     </tr>
     {% endfor %}

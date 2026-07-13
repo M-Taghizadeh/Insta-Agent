@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "macros/ui.html" import icon %}
+{% block title %}ویرایش {{ target.username }} — ادمین{% endblock %}
+{% block topbar_icon %}{{ icon('user', 18) }}{% endblock %}
+{% block topbar_title %}ویرایش کاربر — {{ target.username }}{% endblock %}
+{% block topbar_right %}
+  <a href="{{ url_for('admin.users') }}" class="btn secondary small">بازگشت به کاربران</a>
+{% endblock %}
+{% block content %}
+
+{% set active = 'users' %}
+{% include "admin/_nav.html" %}
+
+<div class="card" style="max-width:520px;padding:22px;">
+  <div style="font-weight:800;margin-bottom:16px;font-size:14px;">ویرایش حساب کاربری</div>
+
+  <form method="post">
+    <div class="field">
+      <label>نام کاربری</label>
+      <input type="text" name="username" value="{{ target.username }}" required minlength="3" maxlength="80" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>ایمیل (اختیاری)</label>
+      <input type="email" name="email" value="{{ target.email or '' }}" placeholder="name@example.com" dir="ltr" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>رمز عبور جدید (اختیاری)</label>
+      <input type="password" name="new_password" placeholder="حداقل ۶ کاراکتر" minlength="6" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>تکرار رمز جدید</label>
+      <input type="password" name="confirm_password" placeholder="در صورت تغییر رمز" autocomplete="new-password">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <button type="submit" class="btn">{{ icon('save', 16) }} ذخیره</button>
+      <a href="{{ url_for('admin.user_subscription', user_id=target.id) }}" class="btn secondary">مدیریت پلن</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

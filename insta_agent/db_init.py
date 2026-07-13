@@ -169,6 +169,8 @@ def _run_migrations():
                   "ALTER TABLE users ADD COLUMN created_at TIMESTAMP")
       _add_column(conn, "users", "is_admin",
                   "ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE")
+      _add_column(conn, "users", "is_active",
+                  "ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE")
       _add_column(conn, "users", "ig_username_requested",
                   "ALTER TABLE users ADD COLUMN ig_username_requested VARCHAR(100) DEFAULT ''")
       _add_column(conn, "users", "tester_status",
@@ -195,6 +197,7 @@ def _run_migrations():
       for stmt in [
         "UPDATE app_settings SET beta_tester_gate=TRUE WHERE beta_tester_gate IS NULL",
         "UPDATE app_settings SET trial_enabled=TRUE WHERE trial_enabled IS NULL",
+        "UPDATE users SET is_active=TRUE WHERE is_active IS NULL",
         "UPDATE dm_rules SET is_active=TRUE WHERE is_active IS NULL",
         "UPDATE dm_rules SET fire_count=0 WHERE fire_count IS NULL",
         "UPDATE comment_rules SET is_active=TRUE WHERE is_active IS NULL",

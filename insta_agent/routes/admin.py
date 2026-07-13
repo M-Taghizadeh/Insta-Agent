@@ -8,6 +8,7 @@ from sqlalchemy import func
 from insta_agent.extensions import db
 from insta_agent.models import (
   User, Plan, Subscription, Payment, IgAccount, Flow, Contact, ActivityLog,
+  FlowSession, ScheduledMessage, SmsConfig, SmsLog, CooldownEntry, Notification, TrialUsage,
 )
 from insta_agent.utils import now_tehran, parse_jalali_date, format_jalali, jalali_years, add_jalali_months
 from insta_agent.services.subscription_service import (
@@ -32,6 +33,30 @@ def admin_required(f):
       abort(403)
     return f(*args, **kwargs)
   return wrapped
+
+
+def _admin_user_guard(target: User, *, allow_self: bool = False) -> str | None:
+  if not target:
+    return "کاربر یافت نشد."
+  if target.id == current_user.id and not allow_self:
+    return "این عملیات روی حساب خودت مجاز نیست."
+  if target.is_admin:
+    return "حساب‌های مدیر قابل تغییر یا حذف نیستند."
+  return None
+
+
+def _delete_user_account(target: User):
+  uid = target.id
+  FlowSession.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  ScheduledMessage.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  SmsLog.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  SmsConfig.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  CooldownEntry.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  Subscription.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  Payment.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  TrialUsage.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  Notification.query.filter_by(user_id=uid).delete(synchronize_session=False)
+  db.session.delete(target)
 
 
 @bp.route("")
@@ -138,6 +163,78 @@ def users():
     sub_live = bool(sub and sub.status == "active" and sub.expires_at and sub.expires_at > now)
     rows.append({"user": u, "ig": ig, "sub": sub, "sub_live": sub_live})
   return render_template("admin/users.html", rows=rows, q=q)
+
+
+@bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def user_edit(user_id):
+  target = User.query.get_or_404(user_id)
+  err = _admin_user_guard(target)
+  if err:
+    flash(err, "error")
+    return redirect(url_for("admin.users"))
+
+  if request.method == "POST":
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip()
+    new_password = request.form.get("new_password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    if len(username) < 3:
+      flash("نام کاربری باید حداقل ۳ کاراکتر باشد.", "error")
+    elif User.query.filter(User.username == username, User.id != target.id).first():
+      flash("این نام کاربری قبلاً استفاده شده.", "error")
+    elif new_password and len(new_password) < 6:
+      flash("رمز جدید باید حداقل ۶ کاراکتر باشد.", "error")
+    elif new_password and new_password != confirm_password:
+      flash("تکرار رمز مطابقت ندارد.", "error")
+    else:
+      target.username = username
+      target.email = email
+      if new_password:
+        target.set_password(new_password)
+      db.session.commit()
+      flash("اطلاعات کاربر ذخیره شد.", "success")
+      return redirect(url_for("admin.users"))
+
+  return render_template("admin/user_edit.html", target=target)
+
+
+@bp.route("/users/<int:user_id>/toggle-active", methods=["POST"])
+@login_required
+@admin_required
+def user_toggle_active(user_id):
+  target = User.query.get_or_404(user_id)
+  err = _admin_user_guard(target)
+  if err:
+    flash(err, "error")
+    return redirect(url_for("admin.users"))
+
+  target.is_active = not target.is_active
+  db.session.commit()
+  if target.is_active:
+    flash(f"اکانت {target.username} فعال شد.", "success")
+  else:
+    flash(f"اکانت {target.username} غیرفعال شد.", "success")
+  return redirect(url_for("admin.users", q=request.form.get("q", "")))
+
+
+@bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def user_delete(user_id):
+  target = User.query.get_or_404(user_id)
+  err = _admin_user_guard(target)
+  if err:
+    flash(err, "error")
+    return redirect(url_for("admin.users"))
+
+  username = target.username
+  _delete_user_account(target)
+  db.session.commit()
+  flash(f"کاربر {username} حذف شد.", "success")
+  return redirect(url_for("admin.users", q=request.form.get("q", "")))
 
 
 @bp.route("/users/<int:user_id>/subscription", methods=["GET", "POST"])
