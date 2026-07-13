@@ -51,15 +51,6 @@
     }));
 
     globeNodes = [];
-    const rings = [0.22, 0.3, 0.38];
-    rings.forEach((radius, ri) => {
-      const count = 18 + ri * 6;
-      for (let i = 0; i < count; i++) {
-        const theta = (i / count) * Math.PI * 2;
-        const tilt = (ri - 1) * 0.55;
-        globeNodes.push({ theta, tilt, radius, speed: 0.002 + ri * 0.001 });
-      }
-    });
   }
 
   function resize() {
