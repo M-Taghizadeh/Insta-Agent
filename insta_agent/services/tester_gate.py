@@ -125,12 +125,12 @@ def mark_connected(user):
 
 
 def reset_for_reconnect(user):
-  """After disconnect — leave admin ready list and require fresh beta onboarding."""
-  if not user or not beta_gate_enabled() or user.is_admin:
+  """After disconnect, clear any remembered onboarding/page identity."""
+  if not user or user.is_admin:
     return
-  status = (user.tester_status or "none").lower()
-  if status not in ("ready", "connected"):
-    return
+
+  # Disconnect باید state مربوط به پیج قبلی را کامل پاک کند تا
+  # اتصال بعدی از مرحله‌ی ثبت یوزرنیم شروع شود.
   user.tester_status = "none"
   user.ig_username_requested = ""
   user.tester_requested_at = None
