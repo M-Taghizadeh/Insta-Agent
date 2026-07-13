@@ -123,9 +123,37 @@
       });
   };
 
+  function initPasswordToggles() {
+    document.querySelectorAll('input[type="password"]').forEach((input) => {
+      if (input.closest('.password-wrap')) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'password-wrap';
+      input.parentNode.insertBefore(wrap, input);
+      wrap.appendChild(input);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'password-toggle-btn';
+      btn.setAttribute('aria-label', 'نمایش رمز عبور');
+      btn.innerHTML = '<i data-lucide="eye" style="width:16px;height:16px"></i>';
+      btn.addEventListener('click', () => {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'مخفی کردن رمز عبور' : 'نمایش رمز عبور');
+        const icon = btn.querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', show ? 'eye-off' : 'eye');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+      wrap.appendChild(btn);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(getPreferredTheme());
     window.refreshIcons();
+    initPasswordToggles();
 
     document.querySelectorAll('select').forEach((sel) => {
       if (sel.closest('.select-wrap')) return;

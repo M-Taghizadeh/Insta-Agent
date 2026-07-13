@@ -64,18 +64,18 @@
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
           <a href="{{ url_for('admin.user_subscription', user_id=row.user.id) }}" class="btn secondary small">مدیریت پلن</a>
           {% if not row.user.is_admin %}
-          <a href="{{ url_for('admin.user_edit', user_id=row.user.id) }}" class="btn ghost small">ویرایش</a>
+          <a href="{{ url_for('admin.user_edit', user_id=row.user.id) }}" class="btn ghost small" title="ویرایش کاربر">{{ icon('pencil', 14) }}</a>
           <form method="post" action="{{ url_for('admin.user_toggle_active', user_id=row.user.id) }}" style="display:inline;">
             <input type="hidden" name="q" value="{{ q }}">
-            <button type="submit" class="btn ghost small">
-              {% if row.user.is_active %}غیرفعال{% else %}فعال{% endif %}
+            <button type="submit" class="btn ghost small" title="{% if row.user.is_active %}غیرفعال کردن{% else %}فعال کردن{% endif %}">
+              {% if row.user.is_active %}{{ icon('ban', 14) }}{% else %}{{ icon('user-check', 14) }}{% endif %}
             </button>
           </form>
           {% if row.user.id != current_user.id %}
           <form method="post" action="{{ url_for('admin.user_delete', user_id=row.user.id) }}" style="display:inline;"
                 onsubmit="return confirm('کاربر {{ row.user.username }} برای همیشه حذف شود؟')">
             <input type="hidden" name="q" value="{{ q }}">
-            <button type="submit" class="btn ghost small" style="color:var(--danger);">حذف</button>
+            <button type="submit" class="btn ghost small" style="color:var(--danger);" title="حذف کاربر">{{ icon('trash-2', 14) }}</button>
           </form>
           {% endif %}
           {% endif %}

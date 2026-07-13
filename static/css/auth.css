@@ -158,6 +158,36 @@ input:focus {
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+.password-wrap {
+  position: relative;
+  display: block;
+}
+.password-wrap input[type="password"],
+.password-wrap input[type="text"] {
+  padding-left: 40px;
+}
+.password-toggle-btn {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--tr), background var(--tr);
+}
+.password-toggle-btn:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
 .btn-auth {
   width: 100%;
   padding: 12px;
