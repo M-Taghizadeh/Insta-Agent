@@ -135,3 +135,14 @@ def reset_for_reconnect(user):
   user.ig_username_requested = ""
   user.tester_requested_at = None
   user.tester_ready_at = None
+
+
+def allow_username_edit(user) -> bool:
+  """Return user to username step while pending admin review."""
+  if not user or user.is_admin or not beta_gate_enabled():
+    return False
+  if (user.tester_status or "none").lower() != "pending":
+    return False
+  user.tester_status = "none"
+  user.tester_requested_at = None
+  return True

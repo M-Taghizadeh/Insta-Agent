@@ -56,7 +56,7 @@ def require_ig_connection_for_panel():
     return
   if ep in ("auth.logout", "auth.onboarding", "auth.pages", "oauth.connect", "oauth.connect_direct", "oauth.connect_manual", "oauth.disconnect", "settings.settings", "settings.profile", "settings.change_password"):
     return
-  if ep in ("auth.request_tester_access", "auth.onboarding_connect"):
+  if ep in ("auth.request_tester_access", "auth.onboarding_connect", "auth.onboarding_back"):
     return
   if ep and ep.startswith("notifications."):
     return
@@ -191,6 +191,23 @@ def request_tester_access():
   notify_admins_new_tester_request(current_user, ig_user)
   notify_user_tester_pending(current_user.id, ig_user)
 
+  return redirect(url_for("auth.onboarding"))
+
+
+@bp.route("/onboarding/back", methods=["POST"])
+@login_required
+def onboarding_back():
+  if user_has_connection(current_user):
+    return redirect(url_for("dashboard.dashboard"))
+  if not beta_gate_enabled() or current_user.is_admin:
+    return redirect(url_for("auth.onboarding"))
+
+  from insta_agent.services.tester_gate import allow_username_edit
+  if allow_username_edit(current_user):
+    db.session.commit()
+    flash("یوزرنیم را ویرایش کن و دوباره ثبت کن.", "success")
+  else:
+    flash("برگشت به مرحله قبل در این وضعیت ممکن نیست.", "error")
   return redirect(url_for("auth.onboarding"))
 
 

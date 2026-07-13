@@ -49,7 +49,7 @@
   <div class="connect-title">یوزرنیم پیجت</div>
   <div class="connect-sub">Business یا Creator</div>
   <form method="post" action="{{ url_for('auth.request_tester_access') }}">
-    <input type="text" name="ig_username" class="ig-input" placeholder="@username" required autofocus autocomplete="off" spellcheck="false">
+    <input type="text" name="ig_username" class="ig-input" placeholder="@username" value="{{ ig_username_requested }}" required autofocus autocomplete="off" spellcheck="false" dir="ltr">
     <button type="submit" class="ig-btn" style="background:var(--primary);">ادامه</button>
   </form>
 
@@ -60,7 +60,12 @@
     <div><strong>پیج در انتظار تایید سامانه</strong><br>به محض فعال‌سازی بهت اعلان می‌دیم.</div>
   </div>
   <p class="connect-hint">تا تأیید تیم محتوام، اتصال پیج فعال نمی‌شود.</p>
-  <a href="{{ url_for('notifications.inbox') }}" class="connect-link">مشاهده اعلان‌ها</a>
+  <form method="post" action="{{ url_for('auth.onboarding_back') }}" style="margin-top:14px;">
+    <button type="submit" class="ig-btn-outline" style="width:100%;">
+      <i data-lucide="arrow-right" style="width:16px;height:16px"></i> مرحله قبل — ویرایش یوزرنیم
+    </button>
+  </form>
+  <a href="{{ url_for('notifications.inbox') }}" class="connect-link" style="display:inline-block;margin-top:14px;">مشاهده اعلان‌ها</a>
 
   {% else %}
   {% if ig_username_requested %}<div class="connect-handle">@{{ ig_username_requested }}</div>{% endif %}
