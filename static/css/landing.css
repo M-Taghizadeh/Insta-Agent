@@ -704,6 +704,16 @@ a.contact-method:hover { border-color: rgba(139, 92, 246, 0.3); background: var(
   .footer-links { justify-content: center; }
 }
 @media (max-width: 560px) {
+  .brand-logo-wrap {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 14px;
+    border-radius: 22px;
+  }
+  .brand-content .section-title {
+    font-size: clamp(1.05rem, 5vw, 1.25rem);
+    white-space: nowrap;
+  }
   .hero {
     padding: 96px 0 64px;
     min-height: auto;
