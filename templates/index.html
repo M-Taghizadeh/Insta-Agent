@@ -3,8 +3,9 @@
 {% block title %}محتوام{% endblock %}
 {% block content %}
 <section class="hero">
+  <canvas class="hero-network" id="hero-network" aria-hidden="true"></canvas>
   <div class="hero-glow" aria-hidden="true"></div>
-  <div class="container">
+  <div class="hero-container">
     <div class="hero-inner">
       <div class="hero-copy">
         <div class="hero-brand-pill">
@@ -13,7 +14,7 @@
         </div>
         <h1 class="hero-title">مدیریت <em>محتوای هوشمند</em></h1>
         <div class="hero-actions">
-          <a href="{{ url_for('auth.register') }}"><button class="btn-landing primary">شروع <i data-lucide="arrow-left" style="width:16px;height:16px"></i></button></a>
+          <a href="{{ url_for('auth.register') }}"><button class="btn-landing primary">شروع <i data-lucide="arrow-left" style="width:18px;height:18px"></i></button></a>
           <a href="#features"><button class="btn-landing ghost">قابلیت‌ها</button></a>
           <span class="btn-landing ghost hero-meta-pill">
             اتصال رسمی به متا
@@ -32,28 +33,28 @@
           <div class="hero-preview-body">
             <div class="preview-carousel" aria-label="ویژگی‌های سامانه">
               <div class="preview-slide">
-                <div class="preview-slide-icon violet"><i data-lucide="message-circle" style="width:16px;height:16px"></i></div>
+                <div class="preview-slide-icon violet"><i data-lucide="message-circle" style="width:18px;height:18px"></i></div>
                 <div>
                   <div class="preview-slide-title">دایرکت هوشمند</div>
                   <div class="preview-slide-desc">پاسخ خودکار به پیام‌ها و ریپلای استوری با کلمات کلیدی</div>
                 </div>
               </div>
               <div class="preview-slide">
-                <div class="preview-slide-icon rose"><i data-lucide="message-square-text" style="width:16px;height:16px"></i></div>
+                <div class="preview-slide-icon rose"><i data-lucide="message-square-text" style="width:18px;height:18px"></i></div>
                 <div>
                   <div class="preview-slide-title">کامنت هوشمند</div>
                   <div class="preview-slide-desc">ارسال پاسخ زیر پست و دایرکت همزمان برای جذب لید</div>
                 </div>
               </div>
               <div class="preview-slide">
-                <div class="preview-slide-icon blue"><i data-lucide="git-branch" style="width:16px;height:16px"></i></div>
+                <div class="preview-slide-icon blue"><i data-lucide="git-branch" style="width:18px;height:18px"></i></div>
                 <div>
                   <div class="preview-slide-title">فلوهای چندمرحله‌ای</div>
                   <div class="preview-slide-desc">طراحی مکالمه، کوییز، جمع‌آوری شماره و ذخیره در CRM</div>
                 </div>
               </div>
               <div class="preview-slide">
-                <div class="preview-slide-icon amber"><i data-lucide="smartphone" style="width:16px;height:16px"></i></div>
+                <div class="preview-slide-icon amber"><i data-lucide="smartphone" style="width:18px;height:18px"></i></div>
                 <div>
                   <div class="preview-slide-title">پیامک و فالوآپ</div>
                   <div class="preview-slide-desc">پیگیری خودکار و ارسال SMS برای کامل‌کردن مسیر فروش</div>
@@ -122,7 +123,7 @@
     </div>
 
     <div class="feature-group">
-      <div class="feature-group-label"><i data-lucide="zap" style="width:16px;height:16px"></i> ایجنت‌های هوشمند</div>
+      <div class="feature-group-label"><i data-lucide="zap" style="width:18px;height:18px"></i> ایجنت‌های هوشمند</div>
       <div class="features-grid features-grid--4">
         <div class="feature-card">
           <div class="feature-icon violet"><i data-lucide="message-circle" style="width:22px;height:22px"></i></div>
@@ -148,7 +149,7 @@
     </div>
 
     <div class="feature-group">
-      <div class="feature-group-label"><i data-lucide="users" style="width:16px;height:16px"></i> فروش و ارتباط</div>
+      <div class="feature-group-label"><i data-lucide="users" style="width:18px;height:18px"></i> فروش و ارتباط</div>
       <div class="features-grid features-grid--3">
         <div class="feature-card">
           <div class="feature-icon green"><i data-lucide="users" style="width:22px;height:22px"></i></div>
@@ -169,7 +170,7 @@
     </div>
 
     <div class="feature-group">
-      <div class="feature-group-label"><i data-lucide="layout-dashboard" style="width:16px;height:16px"></i> مانیتورینگ و مدیریت</div>
+      <div class="feature-group-label"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> مانیتورینگ و مدیریت</div>
       <div class="features-grid features-grid--4">
         <div class="feature-card">
           <div class="feature-icon violet"><i data-lucide="layout-dashboard" style="width:22px;height:22px"></i></div>
@@ -292,8 +293,12 @@
       <div class="cta-logo">{{ brand_mark(48) }}</div>
       <h2 class="cta-title">آماده‌ای با <em>محتوام</em> شروع کنی؟</h2>
       <p class="cta-desc">همین الان ثبت‌نام کن و اینستاگرامت رو به یک ماشین فروش و پاسخ‌دهی هوشمند تبدیل کن.</p>
-      <a href="{{ url_for('auth.register') }}"><button class="btn-landing primary">ثبت‌نام <i data-lucide="arrow-left" style="width:16px;height:16px"></i></button></a>
+      <a href="{{ url_for('auth.register') }}"><button class="btn-landing primary">ثبت‌نام <i data-lucide="arrow-left" style="width:18px;height:18px"></i></button></a>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/hero-network.js') }}" defer></script>
 {% endblock %}
