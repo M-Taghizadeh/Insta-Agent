@@ -21,9 +21,9 @@
     const light = document.documentElement.getAttribute('data-theme') === 'light';
     return light
       ? {
-          dot: 'rgba(124, 58, 237, 0.65)',
-          line: [124, 58, 237],
-          glow: 'rgba(124, 58, 237, 0.1)',
+          dot: 'rgba(109, 40, 217, 0.82)',
+          line: [109, 40, 217],
+          glow: 'rgba(109, 40, 217, 0.16)',
         }
       : {
           dot: 'rgba(167, 139, 250, 0.85)',
