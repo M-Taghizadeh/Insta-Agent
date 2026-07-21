@@ -37,7 +37,7 @@ def read_one(nid: int):
     db.session.commit()
   if action:
     return redirect(action)
-  return redirect(url_for("auth.onboarding"))
+  return redirect(url_for("auth.pages"))
 
 
 @bp.route("/read-all", methods=["POST"])

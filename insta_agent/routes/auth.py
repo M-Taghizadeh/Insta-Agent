@@ -33,9 +33,7 @@ def user_has_connection(user: User) -> bool:
 
 def after_login_redirect():
   try:
-    if user_has_connection(current_user):
-      return redirect(url_for("dashboard.dashboard"))
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("dashboard.dashboard"))
   except Exception:
     db.session.rollback()
     flash("خطای موقت سرور — لطفاً دوباره تلاش کن.", "error")
@@ -60,14 +58,6 @@ def require_ig_connection_for_panel():
     return
   if ep and ep.startswith("notifications."):
     return
-  try:
-    if user_has_connection(current_user):
-      return
-  except Exception:
-    db.session.rollback()
-    return
-  if ep != "auth.onboarding":
-    return redirect(url_for("auth.onboarding"))
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -123,7 +113,7 @@ def register():
       db.session.commit()
       login_user(user, remember=True)
       flash("حسابت ساخته شد.", "success")
-      return redirect(url_for("auth.onboarding"))
+      return redirect(url_for("dashboard.dashboard"))
   return render_template("register.html")
 
 

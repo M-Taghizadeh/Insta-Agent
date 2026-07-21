@@ -61,11 +61,11 @@ def oauth_debug_status():
 def _connect_checks():
   if not oauth_configured():
     flash("OAuth تنظیم نشده — META_APP_ID، META_APP_SECRET و OAUTH_REDIRECT_URI را در Render تنظیم کن.", "error")
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("auth.pages"))
   allowed, gate_msg = can_start_oauth(current_user)
   if not allowed:
     flash(gate_msg, "error")
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("auth.pages"))
   if not current_user.is_admin and IgAccount.query.filter_by(user_id=current_user.id).count() >= 1:
     flash("هر اشتراک فقط یک پیج دارد. برای تعویض، ابتدا پیج فعلی را قطع کن.", "error")
     return redirect(url_for("auth.pages"))
@@ -97,7 +97,7 @@ def connect_manual():
     "oauth_manual.html",
     instagram_login_url=INSTAGRAM_LOGIN_URL,
     oauth_url=build_authorize_url(state=state),
-    back_url=url_for("auth.pages") if has_page else url_for("auth.onboarding"),
+    back_url=url_for("auth.pages"),
   )
 
 
@@ -122,7 +122,7 @@ def callback():
 
   if error:
     flash(f"اتصال اینستاگرام لغو شد: {error_desc or error}", "error")
-    return redirect(url_for("auth.onboarding") if current_user.is_authenticated else url_for("auth.login"))
+    return redirect(url_for("auth.pages") if current_user.is_authenticated else url_for("auth.login"))
 
   if not code:
     flash("کد احراز هویت دریافت نشد.", "error")
@@ -174,7 +174,7 @@ def callback():
         "در تنظیمات اینستاگرام حسابت را به Professional تبدیل کن.",
         "error",
       )
-      return redirect(url_for("auth.onboarding"))
+      return redirect(url_for("auth.pages"))
 
     ig_id = str(profile.get("user_id") or ig_user_id)
     ig_username = profile.get("username") or ""
@@ -226,7 +226,7 @@ def callback():
   except ValueError as e:
     flash(str(e), "error")
     login_user(user, remember=True)
-    dest = url_for("auth.pages") if user_is_admin or _user_has_page(user_id) else url_for("auth.onboarding")
+    dest = url_for("auth.pages")
     return redirect(dest)
   except Exception as e:
     if isinstance(e, (OperationalError, DBAPIError)) and is_disconnect_error(e):
@@ -235,7 +235,7 @@ def callback():
       flash("اتصال به دیتابیس موقتاً قطع شد — دوباره «اتصال پیج اینستاگرام» را بزن.", "error")
     else:
       flash(f"خطا در اتصال اینستاگرام: {e}", "error")
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("auth.pages"))
 
   try:
     def _persist_connection():
@@ -304,8 +304,7 @@ def callback():
 
   except ValueError as e:
     flash(str(e), "error")
-    dest = url_for("auth.pages") if "پیج" in str(e) else url_for("auth.onboarding")
-    return redirect(dest)
+    return redirect(url_for("auth.pages"))
   except (OperationalError, DBAPIError) as e:
     db.session.rollback()
     db.session.remove()
@@ -313,11 +312,11 @@ def callback():
       flash("اتصال به دیتابیس موقتاً قطع شد — دوباره «اتصال پیج اینستاگرام» را بزن.", "error")
     else:
       flash(f"خطای دیتابیس: {e}", "error")
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("auth.pages"))
   except Exception as e:
     db.session.rollback()
     flash(f"خطا در اتصال اینستاگرام: {e}", "error")
-    return redirect(url_for("auth.onboarding"))
+    return redirect(url_for("auth.pages"))
 
 
 @bp.route("/refresh-profiles", methods=["POST"])
@@ -414,4 +413,4 @@ def disconnect_all():
   reset_for_reconnect(current_user)
   db.session.commit()
   flash("اتصال اینستاگرام قطع شد.", "success")
-  return redirect(url_for("auth.onboarding"))
+  return redirect(url_for("auth.pages"))
