@@ -10,7 +10,7 @@
   </form>
   {% endif %}
   {% if oauth_ready and (not accounts or current_user.is_admin) %}
-  <a href="{{ url_for('auth.onboarding') if needs_beta else url_for('oauth.connect') }}" class="btn small">{{ icon('plus', 14) }} {% if needs_beta %}فعال‌سازی پیج{% else %}اتصال پیج{% endif %}</a>
+  <a href="{{ url_for('auth.onboarding') if needs_wizard else url_for('oauth.connect') }}" class="btn small">{{ icon('plus', 14) }} {% if needs_wizard %}{% if onboarding_ctx.phase == 'connect' %}اتصال پیج{% else %}فعال‌سازی پیج{% endif %}{% else %}اتصال پیج{% endif %}</a>
   {% endif %}
 {% endblock %}
 {% block content %}
@@ -100,19 +100,22 @@
 {% else %}
 <div class="empty">
   <div class="empty-icon">{{ icon('instagram', 24) }}</div>
-  {% if needs_beta and onboarding_ctx.phase == 'username' %}
+  {% if needs_wizard and onboarding_ctx.phase == 'username' %}
   <div style="font-size:14px;margin-bottom:8px;">برای اتصال پیج، یوزرنیم اینستاگرامت را ثبت کن</div>
   <div style="font-size:12px;color:var(--text-faint);margin-bottom:16px;">حالت بتا — ابتدا تایید سامانه، بعد اتصال</div>
-  {% elif needs_beta and onboarding_ctx.phase == 'activate' %}
+  {% elif needs_wizard and onboarding_ctx.phase == 'activate' %}
   <div style="font-size:14px;margin-bottom:8px;">پیج <code dir="ltr">@{{ onboarding_ctx.ig_username_requested }}</code> در انتظار تایید سامانه</div>
   <div style="font-size:12px;color:var(--text-faint);margin-bottom:16px;">بعد از فعال‌سازی می‌توانی وصل کنی</div>
+  {% elif needs_wizard and onboarding_ctx.phase == 'connect' %}
+  <div style="font-size:14px;margin-bottom:8px;">پیج <code dir="ltr">@{{ onboarding_ctx.ig_username_requested }}</code> آماده اتصال است</div>
+  <div style="font-size:12px;color:var(--text-faint);margin-bottom:16px;">اول دعوت را در اینستاگرام Accept کن، بعد پیج را وصل کن</div>
   {% else %}
   هنوز پیجی وصل نکردی.
   {% endif %}
   {% if oauth_ready %}
   <div style="margin-top:16px;">
-    <a href="{{ url_for('auth.onboarding') if needs_beta else url_for('oauth.connect') }}" class="btn">
-      {% if needs_beta %}ادامه فعال‌سازی{% else %}اتصال اولین پیج{% endif %}
+    <a href="{{ url_for('auth.onboarding') if needs_wizard else url_for('oauth.connect') }}" class="btn">
+      {% if needs_wizard %}{% if onboarding_ctx.phase == 'connect' %}ادامه اتصال{% else %}ادامه فعال‌سازی{% endif %}{% else %}اتصال اولین پیج{% endif %}
     </a>
   </div>
   {% endif %}

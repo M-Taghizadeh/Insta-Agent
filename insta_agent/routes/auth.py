@@ -8,6 +8,7 @@ from insta_agent.services.instagram_oauth import oauth_configured, oauth_status
 from insta_agent.services.tester_gate import (
   beta_gate_enabled, normalize_ig_username, onboarding_context,
   count_tester_slots_used, can_start_oauth, mark_connected, reset_for_reconnect,
+  needs_onboarding_wizard,
 )
 from insta_agent.utils import now_tehran
 
@@ -141,7 +142,7 @@ def onboarding():
 def request_tester_access():
   if user_has_connection(current_user):
     return redirect(url_for("dashboard.dashboard"))
-  if not beta_gate_enabled() or current_user.is_admin:
+  if not beta_gate_enabled():
     return redirect(url_for("auth.onboarding"))
 
   ig_user = normalize_ig_username(request.form.get("ig_username", ""))
@@ -166,20 +167,26 @@ def request_tester_access():
     flash("درخواستت قبلاً ثبت شده — منتظر فعال‌سازی بمان.", "error")
     return redirect(url_for("auth.onboarding"))
 
-  if count_tester_slots_used() >= Config.BETA_TESTER_SLOTS:
+  if count_tester_slots_used() >= Config.BETA_TESTER_SLOTS and not current_user.is_admin:
     flash("ظرفیت دسترسی زودهنگام پر شده — به زودی دوباره باز می‌شود.", "error")
     return redirect(url_for("auth.onboarding"))
 
   current_user.ig_username_requested = ig_user
-  current_user.tester_status = "pending"
-  current_user.tester_requested_at = now_tehran()
+  if current_user.is_admin:
+    current_user.tester_status = "ready"
+    current_user.tester_requested_at = now_tehran()
+    current_user.tester_ready_at = now_tehran()
+  else:
+    current_user.tester_status = "pending"
+    current_user.tester_requested_at = now_tehran()
   db.session.commit()
 
-  from insta_agent.services.notification_service import (
-    notify_admins_new_tester_request, notify_user_tester_pending,
-  )
-  notify_admins_new_tester_request(current_user, ig_user)
-  notify_user_tester_pending(current_user.id, ig_user)
+  if not current_user.is_admin:
+    from insta_agent.services.notification_service import (
+      notify_admins_new_tester_request, notify_user_tester_pending,
+    )
+    notify_admins_new_tester_request(current_user, ig_user)
+    notify_user_tester_pending(current_user.id, ig_user)
 
   return redirect(url_for("auth.onboarding"))
 
@@ -189,7 +196,7 @@ def request_tester_access():
 def onboarding_back():
   if user_has_connection(current_user):
     return redirect(url_for("dashboard.dashboard"))
-  if not beta_gate_enabled() or current_user.is_admin:
+  if not beta_gate_enabled():
     return redirect(url_for("auth.onboarding"))
 
   from insta_agent.services.tester_gate import allow_username_edit
@@ -228,7 +235,7 @@ def pages():
   from insta_agent.models import IgAccount
   from insta_agent.services.instagram_profile import sync_ig_account_profile, probe_me
   from insta_agent.services.instagram_webhooks import get_webhook_subscription
-  from insta_agent.services.tester_gate import beta_gate_enabled, needs_beta_onboarding, onboarding_context
+  from insta_agent.services.tester_gate import beta_gate_enabled, needs_beta_onboarding, needs_onboarding_wizard, onboarding_context
 
   accounts = IgAccount.query.filter_by(user_id=current_user.id).order_by(
     IgAccount.is_primary.desc(), IgAccount.connected_at.desc()
@@ -264,6 +271,7 @@ def pages():
     token_health=token_health,
     beta_gate=beta_gate_enabled(),
     needs_beta=needs_beta_onboarding(current_user),
+    needs_wizard=needs_onboarding_wizard(current_user),
     onboarding_ctx=onboarding_context(current_user),
   )
 

@@ -66,8 +66,8 @@ def notify_user_tester_pending(user_id: int, ig_username: str):
     kind="user_pending",
     title="در انتظار تایید سامانه",
     body=f"پیج @{ig} ثبت شد. تیم محتوام در حال فعال‌سازی است — معمولاً کمتر از چند ساعت.",
-    action_url="",
-    action_label="",
+    action_url="/onboarding",
+    action_label="مشاهده وضعیت",
     ig_username=ig,
   )
   db.session.commit()
@@ -97,8 +97,8 @@ def notify_user_tester_ready(user_id: int, ig_username: str):
       f"دعوت @{ig} در اینستاگرام ارسال شده. "
       f"اول در تنظیمات اینستاگرام Accept کن، بعد «اتصال پیج» را بزن."
     ),
-    action_url="",
-    action_label="",
+    action_url="/onboarding",
+    action_label="اتصال پیج",
     ig_username=ig,
   )
   db.session.commit()

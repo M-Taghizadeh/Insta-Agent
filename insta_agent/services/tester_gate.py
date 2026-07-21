@@ -20,6 +20,16 @@ def needs_beta_onboarding(user) -> bool:
   return status in ("none", "pending")
 
 
+def needs_onboarding_wizard(user) -> bool:
+  """True when beta wizard UI should be shown (username / pending / connect phases)."""
+  if not beta_gate_enabled():
+    return False
+  if user_has_connection(user):
+    return False
+  status = (user.tester_status or "none").lower()
+  return status in ("none", "pending", "invited", "ready")
+
+
 def normalize_ig_username(raw: str) -> str:
   u = (raw or "").strip().lstrip("@").lower()
   u = u.split("/")[-1].split("?")[0]
@@ -139,7 +149,7 @@ def reset_for_reconnect(user):
 
 def allow_username_edit(user) -> bool:
   """Return user to username step while pending admin review."""
-  if not user or user.is_admin or not beta_gate_enabled():
+  if not user or not beta_gate_enabled():
     return False
   if (user.tester_status or "none").lower() != "pending":
     return False
