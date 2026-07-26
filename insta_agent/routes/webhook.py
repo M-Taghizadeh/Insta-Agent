@@ -229,7 +229,8 @@ def _handle_comment(comment, rules, token, owner_id):
       actions = []
       dm_note = ""
       dm_text = messaging.apply_placeholders((rule.dm_response or "").strip(), comment, ig_username)
-      comment_text = messaging.apply_placeholders((rule.comment_reply or "").strip(), comment, ig_username)
+      picked_reply = messaging.pick_reply_variant(rule.comment_reply or "")
+      comment_text = messaging.apply_placeholders(picked_reply, comment, ig_username)
 
       if dm_text:
         ok2, dm_err = messaging.private_reply(comment_id, dm_text, token, page_id or "")

@@ -1,4 +1,5 @@
 import json
+import random
 import requests
 
 from insta_agent.config import Config
@@ -8,6 +9,7 @@ GRAPH_API = Config.GRAPH_API.rstrip("/")
 FB_GRAPH = "https://graph.facebook.com/v25.0"
 TEXT_TIMEOUT = 12
 MEDIA_TIMEOUT = 40
+REPLY_VARIANT_SEP = "\n|||\n"
 
 
 def _ig_dm_endpoints(ig_account_id: str) -> list[str]:
@@ -16,6 +18,27 @@ def _ig_dm_endpoints(ig_account_id: str) -> list[str]:
     urls.append(f"{GRAPH_API}/{ig_account_id}/messages")
   urls.append(f"{GRAPH_API}/me/messages")
   return urls
+
+
+def split_reply_variants(text: str) -> list[str]:
+  """Split stored reply text into variants. Legacy single replies stay one item."""
+  if not text or not str(text).strip():
+    return []
+  raw = str(text)
+  parts = raw.split(REPLY_VARIANT_SEP) if REPLY_VARIANT_SEP in raw else [raw]
+  return [p.strip() for p in parts if p.strip()]
+
+
+def join_reply_variants(parts: list[str] | tuple[str, ...]) -> str:
+  cleaned = [str(p).strip() for p in parts if p and str(p).strip()]
+  return REPLY_VARIANT_SEP.join(cleaned)
+
+
+def pick_reply_variant(text: str) -> str:
+  variants = split_reply_variants(text)
+  if not variants:
+    return ""
+  return random.choice(variants)
 
 
 def apply_placeholders(text: str, comment: dict | None = None, username: str = "") -> str:

@@ -115,31 +115,37 @@
 
       <div class="divider"></div>
 
-      <!-- Comment reply -->
+      <!-- Comment reply variants -->
       <div class="field">
-        <label>پاسخ زیر کامنت <span class="badge" style="margin-right:5px;">عمومی</span></label>
-        <div class="editor-toolbar">
-          <button type="button" class="emoji-toggle-btn" onclick="togglePicker('comment_reply')">😊 ایموجی</button>
-          <button type="button" onclick="ins('comment_reply','\n')">↵ خط جدید</button>
-          <button type="button" onclick="ins('comment_reply','چک کن دایرکتتو 📩')">متن آماده</button>
+        <label>
+          پاسخ زیر کامنت
+          <span class="badge" style="margin-right:5px;">عمومی</span>
+          <span class="badge purple" style="margin-right:5px;">رندوم</span>
+        </label>
+        <div class="hint" style="margin-bottom:10px;">
+          چند پاسخ بنویس — هر بار یکی به‌صورت تصادفی زیر کامنت ارسال می‌شود.
         </div>
-        <div class="emoji-picker" id="picker-comment_reply" style="display:none">
-          <div class="emoji-tabs">
-            <button type="button" class="etab active" onclick="showTab(this,'cr_sm')">😊</button>
-            <button type="button" class="etab" onclick="showTab(this,'cr_ge')">👋</button>
-            <button type="button" class="etab" onclick="showTab(this,'cr_he')">❤️</button>
-            <button type="button" class="etab" onclick="showTab(this,'cr_fi')">🔥</button>
+        <div id="commentRepliesList" style="display:flex;flex-direction:column;gap:8px;">
+          {% set replies = rule.comment_reply_list if rule and rule.comment_reply_list else [''] %}
+          {% for reply in replies %}
+          <div class="comment-reply-row" style="display:flex;gap:8px;align-items:center;">
+            <input type="text" name="comment_replies" class="comment-reply-input"
+                   value="{{ reply }}"
+                   placeholder="مثلاً: برای شما ارسال شد 📩"
+                   style="flex:1;">
+            <button type="button" class="btn secondary small comment-reply-remove"
+                    title="حذف" onclick="removeCommentReply(this)"
+                    style="{{ 'visibility:hidden' if replies|length <= 1 else '' }}">{{ icon('trash-2', 14) }}</button>
           </div>
-          <div class="emoji-grid" id="grid-cr_sm">😀 😃 😄 😁 😆 😅 🤣 😂 🙂 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 😝 🤑 🤗 🤔 😐 😏 😒 🙄 😬 😮 😲 😳 🥺 😢 😭 😤 😠 😡</div>
-          <div class="emoji-grid" id="grid-cr_ge" style="display:none">👋 🤚 🖐️ ✋ 👌 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 👍 👎 ✊ 👊 👏 🙌 🙏 💪 🤝</div>
-          <div class="emoji-grid" id="grid-cr_he" style="display:none">❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❤️‍🔥 💕 💞 💓 💗 💖 💘 💝</div>
-          <div class="emoji-grid" id="grid-cr_fi" style="display:none">🔥 💥 ⚡ 💫 ✨ 🌟 ⭐ 🏆 👑 💎 💰 💸 🚀 🌈 🎯 🥳 🎉 🎊 🎈</div>
+          {% endfor %}
         </div>
-        <textarea id="comment_reply" name="comment_reply" rows="3"
-                  placeholder="مثلاً: ممنون! دایرکتتو چک کن 📩">{{ rule.comment_reply if rule else '' }}</textarea>
-        <div class="editor-footer">
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn secondary small" onclick="addCommentReply()">{{ icon('plus', 14) }} افزودن پاسخ</button>
+          <button type="button" class="btn secondary small" onclick="addCommentReply('دایرکتت رو چک کن 📩')">متن آماده</button>
+        </div>
+        <div class="editor-footer" style="margin-top:8px;">
           <span style="color:var(--text-faint)">این پیام زیر کامنت کاربر و برای همه قابل مشاهده است</span>
-          <span id="count_comment_reply">0 کاراکتر</span>
+          <span id="commentRepliesCount">{{ replies|length }} پاسخ</span>
         </div>
       </div>
 
@@ -188,6 +194,7 @@
       <div style="font-size:12.5px;color:var(--text-secondary);line-height:2;">
         <div>لینک پست یا ریل اینستاگرام</div>
         <div><strong>چند کلمه:</strong> با ویرگول جدا کن</div>
+        <div>چند پاسخ کامنت: هر بار یکی رندوم</div>
         <div>پاسخ کامنت <strong>عمومی</strong> است</div>
         <div>پاسخ DM <strong>خصوصی</strong> است</div>
         <div><code>{name}</code> اسم کاربر را جایگزین می‌کند</div>
@@ -221,6 +228,45 @@ function updatePreview() {
   ).join('');
 }
 if (triggerInput) { triggerInput.addEventListener('input', updatePreview); updatePreview(); }
+
+// ── Comment reply variants ──
+const repliesList = document.getElementById('commentRepliesList');
+const repliesCount = document.getElementById('commentRepliesCount');
+
+function syncReplyControls() {
+  if (!repliesList) return;
+  const rows = repliesList.querySelectorAll('.comment-reply-row');
+  rows.forEach((row) => {
+    const btn = row.querySelector('.comment-reply-remove');
+    if (btn) btn.style.visibility = rows.length <= 1 ? 'hidden' : 'visible';
+  });
+  if (repliesCount) repliesCount.textContent = rows.length + ' پاسخ';
+}
+
+function addCommentReply(preset) {
+  if (!repliesList) return;
+  const first = repliesList.querySelector('.comment-reply-row');
+  if (!first) return;
+  const row = first.cloneNode(true);
+  const input = row.querySelector('input');
+  input.value = preset || '';
+  const btn = row.querySelector('.comment-reply-remove');
+  if (btn) btn.style.visibility = 'visible';
+  repliesList.appendChild(row);
+  syncReplyControls();
+  input.focus();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function removeCommentReply(btn) {
+  if (!repliesList) return;
+  const rows = repliesList.querySelectorAll('.comment-reply-row');
+  if (rows.length <= 1) return;
+  btn.closest('.comment-reply-row').remove();
+  syncReplyControls();
+}
+
+syncReplyControls();
 
 // ── Post preview ──
 const postLinkInput    = document.getElementById('postLinkInput');

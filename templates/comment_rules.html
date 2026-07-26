@@ -91,11 +91,15 @@
 
         <!-- responses -->
         <div style="display:flex;flex-direction:column;gap:5px;">
-          {% if rule.comment_reply %}
+          {% set reply_list = rule.comment_reply_list %}
+          {% if reply_list %}
           <div style="font-size:11.5px;color:var(--text-dim);background:var(--panel-2);
                       border-radius:6px;padding:6px 10px;border:1px solid var(--border-soft);">
             <span style="font-size:10px;color:var(--text-muted);font-weight:600;margin-left:5px;">{{ icon('message-square-text', 11) }} کامنت</span>
-            {{ rule.comment_reply[:60] }}{% if rule.comment_reply|length > 60 %}…{% endif %}
+            {% if reply_list|length > 1 %}
+            <span class="badge purple" style="font-size:9.5px;margin-left:4px;">{{ reply_list|length }} پاسخ رندوم</span>
+            {% endif %}
+            {{ reply_list[0][:60] }}{% if reply_list[0]|length > 60 %}…{% endif %}
           </div>
           {% endif %}
           {% if rule.dm_response %}

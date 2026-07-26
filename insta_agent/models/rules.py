@@ -31,3 +31,8 @@ class CommentRule(db.Model):
   is_active = db.Column(db.Boolean, default=True)
   fire_count = db.Column(db.Integer, default=0)
   created_at = db.Column(db.DateTime, default=now_tehran)
+
+  @property
+  def comment_reply_list(self) -> list[str]:
+    from insta_agent.services.messaging import split_reply_variants
+    return split_reply_variants(self.comment_reply or "")

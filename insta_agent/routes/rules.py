@@ -7,9 +7,19 @@ from insta_agent.models import DmRule, CommentRule
 from insta_agent.config import Config
 from insta_agent.db_init import get_access_token
 from insta_agent.services.instagram_api import get_post_preview
+from insta_agent.services.messaging import join_reply_variants
 
 bp = Blueprint("rules", __name__)
 PER_PAGE = Config.PER_PAGE
+
+
+def _form_comment_reply() -> str:
+  """Collect multi-variant public replies from the form into one stored string."""
+  parts = request.form.getlist("comment_replies")
+  if parts:
+    return join_reply_variants(parts)
+  # Fallback for older single-field posts
+  return request.form.get("comment_reply", "").strip()
 
 
 def _resolve_post_meta(post_link: str) -> dict:
@@ -126,7 +136,7 @@ def new_comment_rule():
   if request.method == "POST":
     post_link = request.form.get("post_link", "").strip()
     meta = _resolve_post_meta(post_link)
-    comment_reply = request.form.get("comment_reply", "").strip()
+    comment_reply = _form_comment_reply()
     dm_response = request.form.get("dm_response", "").strip()
     if not comment_reply and not dm_response:
       flash("حداقل یکی از پاسخ کامنت یا دایرکت را وارد کن.", "error")
@@ -160,7 +170,7 @@ def edit_comment_rule(rule_id):
   if request.method == "POST":
     post_link = request.form.get("post_link", "").strip()
     meta = _resolve_post_meta(post_link)
-    comment_reply = request.form.get("comment_reply", "").strip()
+    comment_reply = _form_comment_reply()
     dm_response = request.form.get("dm_response", "").strip()
     if not comment_reply and not dm_response:
       flash("حداقل یکی از پاسخ کامنت یا دایرکت را وارد کن.", "error")
