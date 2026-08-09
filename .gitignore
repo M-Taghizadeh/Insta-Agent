@@ -5,6 +5,7 @@
 *.db
 *.db-wal
 *.db-shm
+backup_db
 # Python
 __pycache__/
 *.pyc
